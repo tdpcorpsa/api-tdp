@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directory Controller Test</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .card h2 { margin-top: 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 3px; }
+        button:hover { background-color: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; white-space: pre-wrap; display: none; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Directory Controller Test Client</h1>
+    <p>API Base URL: <input type="text" id="baseUrl" value="http://localhost:3000/api/v1"></p>
+    <p>API Key: <input type="text" id="apiKey" value="tdp-secret-key-123"></p>
+
+    <!-- 1. Check User Exists -->
+    <div class="card">
+        <h2>1. User Exists (GET)</h2>
+        <form onsubmit="handleUserExists(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="e.g. jdoe">
+            <button type="submit">Check Existence</button>
+        </form>
+        <div id="result-exists" class="result"></div>
+    </div>
+
+    <!-- 2. Get User -->
+    <div class="card">
+        <h2>2. Get User Details (GET)</h2>
+        <form onsubmit="handleGetUser(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="e.g. jdoe">
+            <button type="submit">Get User</button>
+        </form>
+        <div id="result-get" class="result"></div>
+    </div>
+
+    <!-- 3. Create User -->
+    <div class="card">
+        <h2>3. Create User (POST)</h2>
+        <form onsubmit="handleCreateUser(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="jdoe">
+            
+            <label>Password:</label>
+            <input type="password" name="password" required placeholder="Secret123!">
+            
+            <label>Given Name:</label>
+            <input type="text" name="givenName" placeholder="John">
+            
+            <label>Surname (SN):</label>
+            <input type="text" name="sn" placeholder="Doe">
+            
+            <label>Email:</label>
+            <input type="email" name="mail" placeholder="jdoe@example.com">
+            
+            <label>User Type:</label>
+            <select name="userType">
+                <option value="interno">Interno</option>
+                <option value="externo">Externo</option>
+                <option value="proveedor">Proveedor</option>
+            </select>
+            
+            <label>Initial State:</label>
+            <select name="initialState">
+                <option value="ACTIVE">ACTIVE</option>
+                <option value="DISABLED">DISABLED</option>
+                <option value="PENDING_CONFIRMATION">PENDING_CONFIRMATION</option>
+            </select>
+
+            <label>
+                <input type="checkbox" name="forcePwdChangeOnFirstLogon" style="width:auto;"> Force Password Change
+            </label>
+
+            <button type="submit">Create User</button>
+        </form>
+        <div id="result-create" class="result"></div>
+    </div>
+
+    <!-- 4. Update User -->
+    <div class="card">
+        <h2>4. Update User (POST)</h2>
+        <form onsubmit="handleUpdateUser(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="jdoe">
+            
+            <label>New Given Name:</label>
+            <input type="text" name="givenName" placeholder="Johnny">
+            
+            <label>New Surname:</label>
+            <input type="text" name="sn" placeholder="Doe Updated">
+            
+            <label>New Email:</label>
+            <input type="email" name="mail" placeholder="newemail@example.com">
+
+            <button type="submit">Update User</button>
+        </form>
+        <div id="result-update" class="result"></div>
+    </div>
+
+    <!-- 5. Password Reset -->
+    <div class="card">
+        <h2>5. Password Reset (POST)</h2>
+        <form onsubmit="handlePasswordReset(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="jdoe">
+            
+            <label>New Password:</label>
+            <input type="password" name="newPassword" required placeholder="NewSecret123!">
+
+            <button type="submit">Reset Password</button>
+        </form>
+        <div id="result-reset" class="result"></div>
+    </div>
+
+    <!-- 6. Delete User -->
+    <div class="card">
+        <h2>6. Delete User (POST)</h2>
+        <form onsubmit="handleDeleteUser(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="jdoe">
+            <button type="submit" style="background-color: #dc3545;">Delete User</button>
+        </form>
+        <div id="result-delete" class="result"></div>
+    </div>
+
+    <!-- 7. Validate Credentials -->
+    <div class="card">
+        <h2>7. Validate Credentials (POST)</h2>
+        <form onsubmit="handleValidateCredentials(event)">
+            <label>Username:</label>
+            <input type="text" name="username" required placeholder="jdoe">
+            
+            <label>Password:</label>
+            <input type="password" name="password" required placeholder="Secret123!">
+
+            <button type="submit">Login Check</button>
+        </form>
+        <div id="result-validate" class="result"></div>
+    </div>
+
+    <script>
+        const getBaseUrl = () => document.getElementById('baseUrl').value;
+        const getApiKey = () => document.getElementById('apiKey').value;
+
+        const getHeaders = () => ({
+            'Content-Type': 'application/json',
+            'x-api-key': getApiKey()
+        });
+
+        const showResult = (elementId, data, isError = false) => {
+            const el = document.getElementById(elementId);
+            el.style.display = 'block';
+            el.className = 'result ' + (isError ? 'error' : 'success');
+            el.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        };
+
+        async function handleValidateCredentials(e) {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                username: form.username.value,
+                password: form.password.value
+            };
+
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/validate-credentials`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showResult('result-validate', data, !data.valid);
+            } catch (err) {
+                showResult('result-validate', err.message, true);
+            }
+        }
+
+        async function handleUserExists(e) {
+            e.preventDefault();
+            const form = e.target;
+            const username = form.username.value;
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/user-exists?username=${username}`, {
+                    headers: { 'x-api-key': getApiKey() }
+                });
+                const data = await res.json();
+                showResult('result-exists', data);
+            } catch (err) {
+                showResult('result-exists', err.message, true);
+            }
+        }
+
+        async function handleGetUser(e) {
+            e.preventDefault();
+            const form = e.target;
+            const username = form.username.value;
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/user-get?username=${username}`, {
+                    headers: { 'x-api-key': getApiKey() }
+                });
+                const data = await res.json();
+                showResult('result-get', data);
+            } catch (err) {
+                showResult('result-get', err.message, true);
+            }
+        }
+
+        async function handleCreateUser(e) {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                username: form.username.value,
+                password: form.password.value,
+                givenName: form.givenName.value || undefined,
+                sn: form.sn.value || undefined,
+                mail: form.mail.value || undefined,
+                userType: form.userType.value,
+                initialState: form.initialState.value,
+                forcePwdChangeOnFirstLogon: form.forcePwdChangeOnFirstLogon.checked
+            };
+
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/user-create`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showResult('result-create', data);
+            } catch (err) {
+                showResult('result-create', err.message, true);
+            }
+        }
+
+        async function handleUpdateUser(e) {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                username: form.username.value,
+                givenName: form.givenName.value || undefined,
+                sn: form.sn.value || undefined,
+                mail: form.mail.value || undefined
+            };
+
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/user-update`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showResult('result-update', data);
+            } catch (err) {
+                showResult('result-update', err.message, true);
+            }
+        }
+
+        async function handlePasswordReset(e) {
+            e.preventDefault();
+            const form = e.target;
+            const body = {
+                username: form.username.value,
+                newPassword: form.newPassword.value
+            };
+
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/password-reset`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showResult('result-reset', data);
+            } catch (err) {
+                showResult('result-reset', err.message, true);
+            }
+        }
+
+        async function handleDeleteUser(e) {
+            e.preventDefault();
+            const form = e.target;
+            const body = { username: form.username.value };
+            
+            if(!confirm('Are you sure you want to delete this user?')) return;
+
+            try {
+                const res = await fetch(`${getBaseUrl()}/directory/user-delete`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                showResult('result-delete', data);
+            } catch (err) {
+                showResult('result-delete', err.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

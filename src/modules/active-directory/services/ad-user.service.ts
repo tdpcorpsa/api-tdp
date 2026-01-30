@@ -87,6 +87,26 @@ export class AdUserService {
   }
 
   /* ===========================
+     Validar Credenciales
+     =========================== */
+
+  async validateCredentials(username: string, password: string): Promise<boolean> {
+    try {
+      await this.withUserClient(username, password, async () => {
+        // Si el bind funciona, las credenciales son válidas
+        return true;
+      });
+      return true;
+    } catch (err) {
+      if (err.name === 'InvalidCredentialsError' || err.name === 'OperationsError') {
+         return false;
+      }
+      // Otros errores (timeout, conexión, etc) los relanzamos
+      throw err;
+    }
+  }
+
+  /* ===========================
      Operaciones LDAP (promises)
      =========================== */
 
@@ -185,8 +205,15 @@ export class AdUserService {
   }
 
   private async dnExists(client: ldap.Client, dn: string): Promise<boolean> {
-    const entry = await this.searchOne(client, dn, { scope: 'base', filter: '(objectClass=*)', attributes: ['dn'] });
-    return !!entry;
+    try {
+      const entry = await this.searchOne(client, dn, { scope: 'base', filter: '(objectClass=*)', attributes: ['dn'] });
+      return !!entry;
+    } catch (err) {
+      if (err.name === 'NoSuchObjectError') {
+        return false;
+      }
+      throw err;
+    }
   }
 
   private async ensureOuPathExists(client: ldap.Client, ouDn: string): Promise<void> {
@@ -242,55 +269,65 @@ export class AdUserService {
     forcePwdChangeOnFirstLogon = false,
   ): Promise<void> {
     return this.withAdminClient(async (client) => {
-      const baseOU = this.resolveBaseOU(userType);
-      await this.ensureOuPathExists(client, baseOU);
+      try {
+        const baseOU = this.resolveBaseOU(userType);
+        await this.ensureOuPathExists(client, baseOU);
 
-      const escapedCN = this.escapeDnValue(username);
-      const userDN = `CN=${escapedCN},${baseOU}`;
+        const escapedCN = this.escapeDnValue(username);
+        const userDN = `CN=${escapedCN},${baseOU}`;
 
-      // UAC base: NORMAL_ACCOUNT = 512
-      let uac = 512;
-      if (initialState !== AccountState.ACTIVE) uac |= 0x0002; // ACCOUNTDISABLE
+        // UAC base: NORMAL_ACCOUNT = 512
+        let uac = 512;
+        if (initialState !== AccountState.ACTIVE) uac |= 0x0002; // ACCOUNTDISABLE
 
-      const displayName = `${givenName ?? ''} ${sn ?? ''}`.trim();
+        const displayName = `${givenName ?? ''} ${sn ?? ''}`.trim();
 
-      // Añadir entrada (ldapjs usa objetos planos)
-      const entry: Record<string, any> = {
-        objectClass: ['top', 'person', 'organizationalPerson', 'user'],
-        cn: username,
-        sAMAccountName: username,
-        userPrincipalName: `${username}@${this.domain}`,
-        displayName,
-        userAccountControl: String(uac),
-      };
+        // Añadir entrada (ldapjs usa objetos planos)
+        const entry: Record<string, any> = {
+          objectClass: ['top', 'person', 'organizationalPerson', 'user'],
+          cn: username,
+          sAMAccountName: username,
+          userPrincipalName: `${username}@${this.domain}`,
+          displayName,
+          userAccountControl: String(uac),
+        };
 
-      if (givenName) entry.givenName = givenName;
-      if (sn) entry.sn = sn;
-      if (mail && mail.trim()) entry.mail = mail.trim();
+        if (givenName) entry.givenName = givenName;
+        if (sn) entry.sn = sn;
+        if (mail && mail.trim()) entry.mail = mail.trim();
 
-      if (initialState === AccountState.PENDING_CONFIRMATION) {
-        entry[AdUserService.PENDING_MARK_ATTR] = AdUserService.PENDING_MARK_VALUE;
-      }
+        if (initialState === AccountState.PENDING_CONFIRMATION) {
+          entry[AdUserService.PENDING_MARK_ATTR] = AdUserService.PENDING_MARK_VALUE;
+        }
 
-      await this.add(client, userDN, entry);
+        await this.add(client, userDN, entry);
 
-      // Password (LDAPS requerido)
-      await this.setPasswordAdmin(username, password);
+        // Password (LDAPS requerido)
+        try {
+          await this.setPasswordAdmin(username, password);
+        } catch (pwdErr) {
+          console.error("Error setting password for user " + username, pwdErr);
+          // Opcional: ¿borrar el usuario si falla el password?
+        }
 
-      if (forcePwdChangeOnFirstLogon) {
-        await this.replaceOrRemoveAttr(client, userDN, 'pwdLastSet', '0');
-      }
+        if (forcePwdChangeOnFirstLogon) {
+          await this.replaceOrRemoveAttr(client, userDN, 'pwdLastSet', '0');
+        }
 
-      // Limpiar atributos no deseados (igual que tu Java)
-      await this.removeAttrIfPresent(client, userDN, 'homeDirectory');
-      await this.removeAttrIfPresent(client, userDN, 'homeDrive');
-      await this.removeAttrIfPresent(client, userDN, 'profilePath');
-      await this.removeAttrIfPresent(client, userDN, 'unixHomeDirectory');
-      await this.removeAttrIfPresent(client, userDN, 'loginShell');
+        // Limpiar atributos no deseados (igual que tu Java)
+        await this.removeAttrIfPresent(client, userDN, 'homeDirectory');
+        await this.removeAttrIfPresent(client, userDN, 'homeDrive');
+        await this.removeAttrIfPresent(client, userDN, 'profilePath');
+        await this.removeAttrIfPresent(client, userDN, 'unixHomeDirectory');
+        await this.removeAttrIfPresent(client, userDN, 'loginShell');
 
-      // Si ACTIVE, habilitar (en caso de que AD cree disabled por defecto)
-      if (initialState === AccountState.ACTIVE) {
-        await this.enableUser(username);
+        // Si ACTIVE, habilitar (en caso de que AD cree disabled por defecto)
+        if (initialState === AccountState.ACTIVE) {
+          await this.enableUser(username);
+        }
+      } catch (err) {
+        console.error("Error creating user in AD Service:", err);
+        throw err;
       }
     });
   }
@@ -337,7 +374,10 @@ export class AdUserService {
 
       const change = new ldap.Change({
         operation: 'replace',
-        modification: { unicodePwd: pwdBytes },
+        modification: {
+          type: 'unicodePwd',
+          values: [pwdBytes]
+        },
       });
 
       await this.modify(client, dn, change);
@@ -352,8 +392,14 @@ export class AdUserService {
       const newBytes = Buffer.from(`"${newPassword}"`, 'utf16le');
 
       const changes = [
-        new ldap.Change({ operation: 'delete', modification: { unicodePwd: oldBytes } }),
-        new ldap.Change({ operation: 'add', modification: { unicodePwd: newBytes } }),
+        new ldap.Change({
+          operation: 'delete',
+          modification: { type: 'unicodePwd', values: [oldBytes] }
+        }),
+        new ldap.Change({
+          operation: 'add',
+          modification: { type: 'unicodePwd', values: [newBytes] }
+        }),
       ];
 
       await this.modify(client, dn, changes);
@@ -367,17 +413,29 @@ export class AdUserService {
       const tmp = `${cryptoRandom()}!`;
       await this.modify(client, dn, new ldap.Change({
         operation: 'replace',
-        modification: { unicodePwd: Buffer.from(`"${tmp}"`, 'utf16le') },
+        modification: {
+          type: 'unicodePwd',
+          values: [Buffer.from(`"${tmp}"`, 'utf16le')]
+        }
       }));
 
       await this.modify(client, dn, new ldap.Change({
         operation: 'replace',
-        modification: { unicodePwd: Buffer.from(`"${newPassword}"`, 'utf16le') },
+        modification: {
+          type: 'unicodePwd',
+          values: [Buffer.from(`"${newPassword}"`, 'utf16le')]
+        }
       }));
 
       const changes = [
-        new ldap.Change({ operation: 'replace', modification: { pwdLastSet: '-1' } }),
-        new ldap.Change({ operation: 'replace', modification: { lockoutTime: '0' } }),
+        new ldap.Change({
+          operation: 'replace',
+          modification: { type: 'pwdLastSet', values: ['-1'] }
+        }),
+        new ldap.Change({
+          operation: 'replace',
+          modification: { type: 'lockoutTime', values: ['0'] }
+        }),
       ];
       await this.modify(client, dn, changes);
     });
@@ -433,7 +491,7 @@ export class AdUserService {
 
       if (!entry) throw new NotFoundException(`Usuario no encontrado: ${username}`);
       return entry.attributes.reduce<Record<string, any>>((acc, a) => {
-        acc[a.type] = a.vals;
+        acc[a.type] = a.values;
         return acc;
       }, { dn });
     });
@@ -448,8 +506,8 @@ export class AdUserService {
     if (!entry) return null;
 
     const attr = entry.attributes.find((a) => a.type === attrName);
-    if (!attr || !attr.vals?.length) return null;
-    const v = Array.isArray(attr.vals) ? attr.vals[0] : attr.vals;
+    if (!attr || !attr.values?.length) return null;
+    const v = Array.isArray(attr.values) ? attr.values[0] : attr.values;
     const n = parseInt(String(v), 10);
     return Number.isFinite(n) ? n : null;
   }
@@ -457,9 +515,21 @@ export class AdUserService {
   private async replaceOrRemoveAttr(client: ldap.Client, dn: string, attrName: string, value: any): Promise<void> {
     try {
       if (value === null || value === undefined) {
-        await this.modify(client, dn, new ldap.Change({ operation: 'delete', modification: { [attrName]: [] } }));
+        await this.modify(client, dn, new ldap.Change({
+          operation: 'delete',
+          modification: {
+            type: attrName,
+            values: []
+          }
+        }));
       } else {
-        await this.modify(client, dn, new ldap.Change({ operation: 'replace', modification: { [attrName]: value } }));
+        await this.modify(client, dn, new ldap.Change({
+          operation: 'replace',
+          modification: {
+            type: attrName,
+            values: [value]
+          }
+        }));
       }
     } catch {
       // Igual que tu Java: si no existe al borrar, lo ignoramos
@@ -468,7 +538,13 @@ export class AdUserService {
 
   private async removeAttrIfPresent(client: ldap.Client, dn: string, attrName: string): Promise<void> {
     try {
-      await this.modify(client, dn, new ldap.Change({ operation: 'delete', modification: { [attrName]: [] } }));
+      await this.modify(client, dn, new ldap.Change({
+        operation: 'delete',
+        modification: {
+          type: attrName,
+          values: []
+        }
+      }));
     } catch {
       // ignore
     }
