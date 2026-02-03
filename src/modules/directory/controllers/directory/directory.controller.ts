@@ -12,11 +12,11 @@ import { ApiKeyGuard } from 'src/modules/auth/guards/api-key.guard';
 import { ApiHeader, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Directory')
-/*@ApiHeader({
+@ApiHeader({
   name: 'x-api-key',
   description: 'API Key para autenticación servidor-a-servidor',
 })
-@UseGuards(ApiKeyGuard)*/
+@UseGuards(ApiKeyGuard)
 @Controller('directory')
 export class DirectoryController {
    constructor(private readonly directory: DirectoryService,
