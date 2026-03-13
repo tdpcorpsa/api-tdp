@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reporte de Inspección</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 8mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      font-size: 10px;
+    }
+
+    .sheet {
+      width: 100%;
+      page-break-after: always;
+    }
+
+    .sheet:last-child {
+      page-break-after: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .header-table {
+      margin-bottom: 0;
+    }
+
+    .header-table td {
+      border: 1px solid #000;
+      padding: 0;
+      vertical-align: middle;
+    }
+
+    .logo-cell {
+      width: 19.5%;
+      height: 50px;
+      text-align: center;
+    }
+
+    .logo-cell img {
+      max-width: 88%;
+      max-height: 38px;
+      margin-top: 4px;
+    }
+
+    .logo-fallback {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .title-cell {
+      width: 67.5%;
+      text-align: center;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 10px 8px;
+    }
+
+    .meta-cell {
+      width: 13%;
+      padding: 0 !important;
+    }
+
+    .meta-inner {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .meta-inner td {
+      border: 1px solid #000;
+      text-align: center;
+      font-size: 10px;
+      height: 16px;
+      padding: 2px 3px;
+    }
+
+    .main-table td,
+    .main-table th {
+      border: 1px solid #000;
+      padding: 2px 3px;
+      vertical-align: middle;
+      word-wrap: break-word;
+    }
+
+    .main-table th {
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .head-blue {
+      background: #dbe8f4;
+    }
+
+    .top-info {
+      height: 88px;
+      vertical-align: top !important;
+      padding: 8px 10px 4px 10px !important;
+      font-size: 10px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 14px;
+      row-gap: 4px;
+    }
+
+    .info-block {
+      line-height: 1.25;
+    }
+
+    .info-line {
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .label {
+      font-weight: 700;
+    }
+
+    .subhead-row th {
+      height: 20px;
+      font-size: 9px;
+      line-height: 1.1;
+    }
+
+    .header-row th {
+      height: 38px;
+      font-size: 9px;
+      line-height: 1.1;
+    }
+
+    .item-col { width: 3.5%; }
+    .codigo-col { width: 8.5%; }
+    .descripcion-col { width: 8.7%; }
+    .cant-col { width: 6.8%; }
+    .cantinsp-col { width: 7.2%; }
+    .lote-col { width: 5.2%; }
+    .oppo-col { width: 6.2%; }
+    .calidad-col { width: 8.5%; }
+    .pick-col { width: 7.7%; }
+    .pack-col { width: 7.7%; }
+    .foto-col { width: 18.5%; }
+    .estado-col { width: 12.0%; }
+
+    .detail-row td {
+      height: 600px;
+      font-size: 9px;
+      line-height: 1.15;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .desc-wrap {
+      white-space: pre-line;
+      line-height: 1.15;
+    }
+
+    .calidad-text,
+    .estado-text {
+      font-size: 10px;
+    }
+
+    .people-cell {
+      text-align: left !important;
+      padding: 6px 4px !important;
+      line-height: 1.2;
+    }
+
+    .people-label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .people-value {
+      display: block;
+      margin-bottom: 10px;
+      white-space: pre-line;
+    }
+
+    .photos-cell {
+      padding: 8px 4px !important;
+      vertical-align: top !important;
+    }
+
+    .photos-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .photos-wrap img {
+      width: 78px;
+      max-height: 112px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .no-photo {
+      font-style: italic;
+      color: #444;
+      margin-top: 20px;
+    }
+
+    .footer-row td {
+      height: 60px;
+      vertical-align: top !important;
+      font-size: 9px;
+      padding: 6px 8px !important;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .footer-left,
+    .footer-right {
+      line-height: 1.35;
+    }
+
+    .footer-right {
+      text-align: left;
+      padding-left: 24px;
+    }
+
+    .footer-label {
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+{{#each atributos}}
+<div class="sheet">
+
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell">
+        {{#if ../logoBase64}}
+          <img src="{{../logoBase64}}" alt="logo">
+        {{else}}
+          <div class="logo-fallback">LOGO</div>
+        {{/if}}
+      </td>
+      <td class="title-cell">FR-CAL-004 Reporte de Inspección de Calidad en Despacho</td>
+      <td class="meta-cell">
+        <table class="meta-inner">
+          <tr><td>Rev.0</td></tr>
+          <tr><td>Fecha: 10/02/2026</td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+
+  <table class="main-table">
+    <colgroup>
+      <col class="item-col">
+      <col class="codigo-col">
+      <col class="descripcion-col">
+      <col class="cant-col">
+      <col class="cantinsp-col">
+      <col class="lote-col">
+      <col class="oppo-col">
+      <col class="calidad-col">
+      <col class="pick-col">
+      <col class="pack-col">
+      <col class="foto-col">
+      <col class="estado-col">
+    </colgroup>
+
+    <tr>
+      <td colspan="12" class="top-info">
+        <div class="info-grid">
+          <div class="info-block">
+            <div class="info-line"><span class="label">Fecha de despacho:</span> __________________ {{fmtDate ../fechaDespacho}}</div>
+            <div class="info-line"><span class="label">Fecha de inspección:</span> ________________ {{fmtDate ../fechaInspeccion}}</div>
+            <div class="info-line"><span class="label">Cliente:</span> _____________________________ {{orDash ../cliente}}</div>
+            <div class="info-line"><span class="label">N°pedido:</span> ___________________________ {{orDash ../nPedido}}</div>
+          </div>
+
+          <div class="info-block">
+            <div class="info-line"><span class="label">N° Factura:</span> __________________ {{orDash ../nFactura}}</div>
+            <div class="info-line"><span class="label">N° Guía:</span> _____________________ {{orDash ../nGuia}}</div>
+            <div class="info-line"><span class="label">Cantidad de códigos:</span> _________ {{orDash ../cantidadCodigos}}</div>
+            <div class="info-line"><span class="label">Cantidad de códigos revisados:</span> _ {{orDash ../cantCodigosRevisados}}</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+
+    <tr class="subhead-row">
+      <th class="head-blue" colspan="7"></th>
+      <th class="head-blue" colspan="4">PUNTOS A INSPECCIONAR</th>
+      <th class="head-blue"></th>
+    </tr>
+
+    <tr class="header-row">
+      <th class="head-blue">ítem</th>
+      <th class="head-blue">Código</th>
+      <th class="head-blue">Descripción</th>
+      <th class="head-blue">Cantidad<br>(unidades)</th>
+      <th class="head-blue">Cantidad inspeccionada<br>(unidades)</th>
+      <th class="head-blue">Lote</th>
+      <th class="head-blue">OP/PO</th>
+      <th class="head-blue">Calidad del producto</th>
+      <th class="head-blue">Datos del picking</th>
+      <th class="head-blue">Datos del packing</th>
+      <th class="head-blue">Evidencia fotográfica</th>
+      <th class="head-blue">Estado de inspección</th>
+    </tr>
+
+    <tr class="detail-row">
+      <td>{{plusOne @index}}</td>
+      <td>{{orDash codigo}}</td>
+      <td><div class="desc-wrap">{{orDash descripcion}}</div></td>
+      <td>{{orDash cantidadUnidades}}</td>
+      <td>{{orDash cantidadInspeccionada}}</td>
+      <td>{{orDash lote}}</td>
+      <td>{{orDash opPo}}</td>
+      <td><div class="calidad-text">{{orDash calidadProducto}}</div></td>
+
+      <td class="people-cell">
+        <span class="people-label">Realizado por:</span>
+        <span class="people-value">{{joinCsv pickingRealizadoPor}}</span>
+        <span class="people-label">Revisado por:</span>
+        <span class="people-value">{{joinCsv pickingRevisadoPor}}</span>
+      </td>
+
+      <td class="people-cell">
+        <span class="people-label">Realizado por:</span>
+        <span class="people-value">{{joinCsv packingRealizadoPor}}</span>
+        <span class="people-label">Revisado por:</span>
+        <span class="people-value">{{joinCsv packingRevisadoPor}}</span>
+      </td>
+
+      <td class="photos-cell">
+        <div class="photos-wrap">
+          {{#if photoBase64}}
+            <img src="{{photoBase64}}" alt="foto">
+          {{else}}
+            <div class="no-photo">Sin evidencia</div>
+          {{/if}}
+        </div>
+      </td>
+
+      <td><div class="estado-text">{{orDash estadoInspeccion}}</div></td>
+    </tr>
+
+    <tr class="footer-row">
+      <td colspan="7">
+        <div class="footer-left">
+          <div><span class="footer-label">Nombre del transportista:</span> {{orDash ../transportistaNombre}}</div>
+          <div><span class="footer-label">Nombre del transporte:</span> {{orDash ../transporteNombre}}</div>
+          <div><span class="footer-label">Responsable del despacho:</span> {{orDash ../responsableDespacho}}</div>
+          <div><span class="footer-label">Observaciones:</span> {{orDash ../observaciones}}</div>
+        </div>
+      </td>
+      <td colspan="5">
+        <div class="footer-right">
+          <div><span class="footer-label">Inspección realizada por:</span> {{orDash ../inspeccionRealizadaPor}}</div>
+          <div><span class="footer-label">Inspección aprobada por:</span> {{orDash ../inspeccionAprobadaPor}}</div>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+</div>
+{{/each}}
+
+</body>
+</html>
