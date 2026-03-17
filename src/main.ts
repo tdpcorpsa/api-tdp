@@ -16,6 +16,15 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+  
+  app.enableCors({
+    origin: [
+      'http://localhost:8100',
+      'http://127.0.0.1:8100'
+    ],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true
+  });
 
   const config = new DocumentBuilder()
   .setTitle('API TDP')
