@@ -1,0 +1,130 @@
+[{
+    "id": 28,
+    "cliruc": "20100128056",
+    "cliente": "HOLA FALABELLA S.A.",
+    "nPedido": "260200474",
+    "fechaInspeccion": "2026-03-18T00:00:00",
+    "fechaDespacho": "2026-03-18T00:00:00",
+    "nGuia": "22222222",
+    "nFactura": "01-F023-00020798",
+    "cantidadCodigos": 3,
+    "cantCodigosRevisados": 2,
+    "transportistaNombre": "333",
+    "transporteNombre": "ALVA CUADROS WALTER",
+    "responsableDespacho": "carolina.vertiz",
+    "observaciones": "deeeeed",
+    "fechaRegistro": "2026-03-18T17:39:51",
+    "usuarioRegistro": "luis.perea",
+    "estado": "E",
+    "atributos": [
+        {
+            "id": 24,
+            "padreId": 28,
+            "opPo": "0236-24",
+            "codigo": ".30-50",
+            "descripcion": "THERMOS®  0.50  LT.  VOGUE",
+            "cantidadUnidades": 2,
+            "cantidadInspeccionada": 1,
+            "lote": "0498-23",
+            "calidadProducto": "ACABADO ADECUADO",
+            "pickingRealizadoPor": "angelica.huirse,anita.urbina",
+            "pickingRevisadoPor": "carolina.vertiz,diego.sakoda",
+            "packingRealizadoPor": "carolina.vertiz,liz.chunga",
+            "packingRevisadoPor": "carolina.vertiz,liz.chunga",
+            "estadoInspeccion": "CONFORME CON OBSERVACIÓN",
+            "fechaRegistro": 1773873591000,
+            "fotos": [
+                {
+                    "id": 707,
+                    "origen": "DDESPACHO",
+                    "padreId": 24,
+                    "ruta": "http://127.0.0.1:8080/tdpservice/rest/servtec/foto/17738735876421773873590895.png?time=1773873486585",
+                    "nombre": "17738735876421773873590895",
+                    "ext": "png"
+                }
+            ],
+            "pickingRealizadoPor_": [
+                "angelica.huirse",
+                "anita.urbina"
+            ],
+            "pickingRevisadoPor_": [
+                "carolina.vertiz",
+                "diego.sakoda"
+            ],
+            "packingRealizadoPor_": [
+                "carolina.vertiz",
+                "liz.chunga"
+            ],
+            "packingRevisadoPor_": [
+                "carolina.vertiz",
+                "liz.chunga"
+            ]
+        }
+    ],
+    "docsFechaIni": "2026-03-18T17:39:56"
+},
+{
+    "id": 28,
+    "cliruc": "20100128056",
+    "cliente": "SAGA FALABELLA S.A.",
+    "nPedido": "260200474",
+    "fechaInspeccion": "2026-03-18T00:00:00",
+    "fechaDespacho": "2026-03-18T00:00:00",
+    "nGuia": "22222222",
+    "nFactura": "01-F023-00020798",
+    "cantidadCodigos": 3,
+    "cantCodigosRevisados": 2,
+    "transportistaNombre": "333",
+    "transporteNombre": "ALVA CUADROS WALTER",
+    "responsableDespacho": "carolina.vertiz",
+    "observaciones": "deeeeed",
+    "fechaRegistro": "2026-03-18T17:39:51",
+    "usuarioRegistro": "luis.perea",
+    "estado": "E",
+    "atributos": [
+        {
+            "id": 24,
+            "padreId": 28,
+            "opPo": "0236-24",
+            "codigo": ".30-50",
+            "descripcion": "THERMOS®  0.50  LT.  VOGUE",
+            "cantidadUnidades": 2,
+            "cantidadInspeccionada": 1,
+            "lote": "0498-23",
+            "calidadProducto": "ACABADO ADECUADO",
+            "pickingRealizadoPor": "angelica.huirse,anita.urbina",
+            "pickingRevisadoPor": "carolina.vertiz,diego.sakoda",
+            "packingRealizadoPor": "carolina.vertiz,liz.chunga",
+            "packingRevisadoPor": "carolina.vertiz,liz.chunga",
+            "estadoInspeccion": "CONFORME CON OBSERVACIÓN",
+            "fechaRegistro": 1773873591000,
+            "fotos": [
+                {
+                    "id": 707,
+                    "origen": "DDESPACHO",
+                    "padreId": 24,
+                    "ruta": "http://127.0.0.1:8080/tdpservice/rest/servtec/foto/17738735876421773873590895.png?time=1773873486585",
+                    "nombre": "17738735876421773873590895",
+                    "ext": "png"
+                }
+            ],
+            "pickingRealizadoPor_": [
+                "angelica.huirse",
+                "anita.urbina"
+            ],
+            "pickingRevisadoPor_": [
+                "carolina.vertiz",
+                "diego.sakoda"
+            ],
+            "packingRealizadoPor_": [
+                "carolina.vertiz",
+                "liz.chunga"
+            ],
+            "packingRevisadoPor_": [
+                "carolina.vertiz",
+                "liz.chunga"
+            ]
+        }
+    ],
+    "docsFechaIni": "2026-03-18T17:39:56"
+}]

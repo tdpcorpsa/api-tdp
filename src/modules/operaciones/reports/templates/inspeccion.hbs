@@ -54,9 +54,10 @@
     }
 
     .logo-cell img {
-      max-width: 88%;
+      max-width: 85%;
       max-height: 38px;
-      margin-top: 4px;
+      object-fit: contain;
+      margin: auto;
     }
 
     .logo-fallback {
@@ -212,56 +213,26 @@
     }
 
     .photos-wrap img {
-      width: 78px;
-      max-height: 112px;
+      width: 100%;
+      max-width: 120px;
+      max-height: 140px;
       object-fit: contain;
       display: block;
-    }
-
-    .no-photo {
-      font-style: italic;
-      color: #444;
-      margin-top: 20px;
-    }
-
-    .footer-row td {
-      height: 60px;
-      vertical-align: top !important;
-      font-size: 9px;
-      padding: 6px 8px !important;
-    }
-
-    .footer-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .footer-left,
-    .footer-right {
-      line-height: 1.35;
-    }
-
-    .footer-right {
-      text-align: left;
-      padding-left: 24px;
-    }
-
-    .footer-label {
-      font-weight: 700;
     }
   </style>
 </head>
 <body>
 
-{{#each atributos}}
+{{#each this}}
 <div class="sheet">
 
   <table class="header-table">
     <tr>
       <td class="logo-cell">
-        {{#if ../logoBase64}}
-          <img src="{{../logoBase64}}" alt="logo">
+        {{#if globalLogo}}
+          <img src="{{globalLogo}}" alt="logo">
+        {{else if logoBase64}}
+          <img src="{{logoBase64}}" alt="logo">
         {{else}}
           <div class="logo-fallback">LOGO</div>
         {{/if}}
@@ -296,18 +267,18 @@
       <td colspan="12" class="top-info">
         <div class="info-grid">
           <div class="info-block">
-            <div class="info-line"><span class="label">Fecha de despacho:</span>  {{fmtDate ../fechaDespacho}}</div>
-            <div class="info-line"><span class="label">Fecha de inspección:</span>  {{fmtDate ../fechaInspeccion}}</div>
-            <div class="info-line"><span class="label">Cliente:</span>  {{orDash ../cliente}}</div>
-            <div class="info-line"><span class="label">N°pedido:</span>  {{orDash ../nPedido}}</div>
+            <div class="info-line"><span class="label">Fecha de despacho:</span>  {{fmtDate fechaDespacho}}</div>
+            <div class="info-line"><span class="label">Fecha de inspección:</span>  {{fmtDate fechaInspeccion}}</div>
+            <div class="info-line"><span class="label">Cliente:</span>  {{orDash cliente}}</div>
+            <div class="info-line"><span class="label">N°pedido:</span>  {{orDash nPedido}}</div>
           </div>
 
           <div class="info-block">
-            <div class="info-line"><span class="label">N° Factura:</span>  {{orDash ../nFactura}}</div>
-            <div class="info-line"><span class="label">N° Guía:</span>  {{orDash ../nGuia}}</div>
-            <div class="info-line"><span class="label">Cantidad de códigos:</span>  {{orDash ../cantidadCodigos}}</div>
+            <div class="info-line"><span class="label">N° Factura:</span>  {{orDash nFactura}}</div>
+            <div class="info-line"><span class="label">N° Guía:</span>  {{orDash nGuia}}</div>
+            <div class="info-line"><span class="label">Cantidad de códigos:</span>  {{orDash cantidadCodigos}}</div>
 
-            <div class="info-line"><span class="label">Cantidad de códigos revisados:</span>  {{orDash ../cantCodigosRevisados}}</div>
+            <div class="info-line"><span class="label">Cantidad de códigos revisados:</span>  {{orDash cantCodigosRevisados}}</div>
           </div>
         </div>
       </td>
@@ -334,6 +305,7 @@
       <th class="head-blue">Estado de inspección</th>
     </tr>
 
+    {{#each atributos}}
     <tr class="detail-row">
       <td>{{plusOne @index}}</td>
       <td>{{orDash codigo}}</td>
@@ -360,8 +332,10 @@
 
       <td class="photos-cell">
         <div class="photos-wrap">
-          {{#if photoBase64}}
-            <img src="{{photoBase64}}" alt="foto">
+          {{#if fotos}}
+            {{#each fotos}}
+              <img src="{{ruta}}" alt="foto">
+            {{/each}}
           {{else}}
             <div class="no-photo">Sin evidencia</div>
           {{/if}}
@@ -370,20 +344,21 @@
 
       <td><div class="estado-text">{{orDash estadoInspeccion}}</div></td>
     </tr>
+    {{/each}}
 
     <tr class="footer-row">
       <td colspan="7">
         <div class="footer-left">
-          <div><span class="footer-label">Nombre del transportista:</span> {{orDash ../transportistaNombre}}</div>
-          <div><span class="footer-label">Nombre del transporte:</span> {{orDash ../transporteNombre}}</div>
-          <div><span class="footer-label">Responsable del despacho:</span> {{orDash ../responsableDespacho}}</div>
-          <div><span class="footer-label">Observaciones:</span> {{orDash ../observaciones}}</div>
+          <div><span class="footer-label">Nombre del transportista:</span> {{orDash transportistaNombre}}</div>
+          <div><span class="footer-label">Nombre del transporte:</span> {{orDash transporteNombre}}</div>
+          <div><span class="footer-label">Responsable del despacho:</span> {{orDash responsableDespacho}}</div>
+          <div><span class="footer-label">Observaciones:</span> {{orDash observaciones}}</div>
         </div>
       </td>
       <td colspan="5">
         <div class="footer-right">
-          <div><span class="footer-label">Inspección realizada por:</span> {{orDash ../inspeccionRealizadaPor}}</div>
-          <div><span class="footer-label">Inspección aprobada por:</span> {{orDash ../inspeccionAprobadaPor}}</div>
+          <div><span class="footer-label">Inspección realizada por:</span> {{orDash usuarioRegistro}}</div>
+          <div><span class="footer-label">Inspección aprobada por:</span> {{orDash supervisor}}</div>
         </div>
       </td>
     </tr>

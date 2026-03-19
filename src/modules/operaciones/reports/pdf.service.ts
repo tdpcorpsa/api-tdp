@@ -1,13 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import puppeteer from 'puppeteer';
 import { TemplateService } from './template.service';
+import fs from 'fs';
+import path from 'path';
 
 @Injectable()
 export class PdfService {
   private readonly templateService = new TemplateService();
 
+  private getLogoBase64(): string {
+    try {
+      const logoPath = path.join(process.cwd(), 'src', 'common', 'assets', 'tdplogo.jpg');
+      const logoBuffer = fs.readFileSync(logoPath);
+      return `data:image/jpeg;base64,${logoBuffer.toString('base64')}`;
+    } catch (error) {
+      console.error('Error loading logo:', error);
+      return '';
+    }
+  }
+
   async generateInspeccionPdf(data: any): Promise<Buffer> {
-    const html = this.templateService.render('inspeccion', data);
+    const logoBase64 = this.getLogoBase64();
+    
+    // Si data es un array, inyectamos el logo en cada objeto
+    const processedData = Array.isArray(data) 
+      ? data.map(item => ({ ...item, globalLogo: logoBase64 }))
+      : { ...data, globalLogo: logoBase64 };
+
+    const html = this.templateService.render('inspeccion', processedData);
 
     const browser = await puppeteer.launch({
       headless: true,
@@ -25,10 +45,10 @@ export class PdfService {
         format: 'A4',
         printBackground: true,
         margin: {
-          top: '8mm',
-          right: '8mm',
-          bottom: '8mm',
-          left: '8mm',
+          top: '0mm',
+          right: '0mm',
+          bottom: '0mm',
+          left: '0mm',
         },
       });
 
