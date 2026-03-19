@@ -38,7 +38,7 @@ export class OperacionesController {
   @Post('despacho-pdfreport-get')
   async makeDespachoReport(@Body() body: any): Promise<object> {
   //async makeDespachoReport(@Query() q: OperTDespacho): Promise<object> {
-    console.log(body);
+    //console.log(body);
     const report = await this.operaciones.makeDespachoReport(body);
     return { report };
   }
