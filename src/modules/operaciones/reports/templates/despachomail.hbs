@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<img src="servicios.tdpcorp.com.pe/emailconf/tdpcorp/header.png">
+<h3>
+Informe de inspecci&oacute;n : {{orDash id}}
+</h3>
+<p>
+Se adjunta informe en formato pdf. 
+</p>
+<table>
+<tr>
+	<td>
+		<img src="servicios.tdpcorp.com.pe/emailconf/tdpcorp/doc.png">
+	</td>
+	<td>
+		<table>
+		<tr><td>
+		<b>Informe de inspecci&oacute;n de despachos TDP CORP S.A.:</b>
+		</td></tr>
+		<tr><td>
+		Caso: <a href="https://servicios.tdpcorp.com.pe/#dominio#/#/ini/despacho/caso/{{orDash id}}"></a>		
+		</td></tr>				
+		<tr><td>
+		Fecha recepci&oacute;n: {{orDash fechaInspeccion}}
+		</td></tr>		
+		<tr><td>
+		Cliente: {{orDash cliente}}
+		</td></tr>
+		<tr><td>
+		Estado: <div>{{orDash estado}}</div>
+		</td></tr>
+		<tr><td>
+		Registr&oacute;: {{orDash usuarioRegistro}}
+		</td></tr>
+		<!--tr><td>			
+			<p><b>Observaciones:</b><br/>
+			#observaciones#</p>
+		</td></tr-->
+		</table>
+	</td>
+</tr>
+</table>   
+</body>
+</html>

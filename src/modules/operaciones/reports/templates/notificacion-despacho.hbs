@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+        .header {
+            background-color: #004a99;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .footer {
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        .label {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Notificación de Despacho</h1>
+        </div>
+        <div class="content">
+            <p>Estimado/a,</p>
+            <p>Se ha generado un nuevo reporte de inspección de calidad para el despacho con los siguientes detalles:</p>
+            
+            <ul>
+                <li><span class="label">Cliente:</span> {{cliente}}</li>
+                <li><span class="label">N° Pedido:</span> {{nPedido}}</li>
+                <li><span class="label">Fecha de Inspección:</span> {{fmtDate fechaInspeccion}}</li>
+                <li><span class="label">Responsable:</span> {{responsableDespacho}}</li>
+            </ul>
+
+            <p>Adjunto a este correo encontrará el informe detallado en formato PDF.</p>
+            
+            <p>Atentamente,<br>
+            Sistema de Notificaciones TDP</p>
+        </div>
+        <div class="footer">
+            Este es un correo automático, por favor no responda a este mensaje.
+        </div>
+    </div>
+</body>
+</html>

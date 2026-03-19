@@ -35,6 +35,19 @@ export class OperacionesController {
 
   }
 
+  @Post('despacho/notificar-inspeccion')
+  async notificarReporte(
+    @Body() body: { data: any, emailTo: string | string[] }
+  ) {
+    console.log('Notificando reporte a:', body.emailTo);
+    const success = await this.operaciones.notificarDespachoEmail(body.data, body.emailTo);
+    
+    return { 
+      success, 
+      message: success ? 'Correo enviado correctamente' : 'Error al enviar el correo' 
+    };
+  }
+
   @Post('despacho-pdfreport-get')
   async makeDespachoReport(@Body() body: any): Promise<object> {
   //async makeDespachoReport(@Query() q: OperTDespacho): Promise<object> {
