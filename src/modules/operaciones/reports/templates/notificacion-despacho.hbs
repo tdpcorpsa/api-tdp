@@ -39,17 +39,29 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Notificación de Despacho</h1>
+            <h1>Notificación inspección de despacho</h1>
         </div>
         <div class="content">
             <p>Estimado/a,</p>
-            <p>Se ha generado un nuevo reporte de inspección de calidad para el despacho con los siguientes detalles:</p>
+            <p>Se envía reporte de inspección de despacho con los siguientes detalles:</p>
             
             <ul>
+                <li><span class="label">ID:</span> {{id}}</li>
                 <li><span class="label">Cliente:</span> {{cliente}}</li>
                 <li><span class="label">N° Pedido:</span> {{nPedido}}</li>
                 <li><span class="label">Fecha de Inspección:</span> {{fmtDate fechaInspeccion}}</li>
                 <li><span class="label">Responsable:</span> {{responsableDespacho}}</li>
+                <li>
+                <b><span class="label">Estado:</span>
+                {{#if (eq estado 'A')}}
+                    Aprobado
+                {{else if (eq estado 'R')}}
+                    Rechazado
+                {{else}}
+                    En espera de aprobación
+                {{/if}}
+                </li>
+                </b>
             </ul>
 
             <p>Adjunto a este correo encontrará el informe detallado en formato PDF.</p>

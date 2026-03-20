@@ -29,4 +29,5 @@ export function registerReportHelpers() {
     return String(value);
   });
   Handlebars.registerHelper('plusOne', (value: number) => Number(value) + 1);
+  Handlebars.registerHelper('eq', (a, b) => a === b);
 }

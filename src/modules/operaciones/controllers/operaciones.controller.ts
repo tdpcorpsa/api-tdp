@@ -22,7 +22,7 @@ export class OperacionesController {
     @Body() body: any,
     @Res() res: Response
   ) {
-    console.log(body);
+    //console.log(body);
     const pdf = await this.operaciones.generarReporteInspeccionPdf(body);
 
     res.setHeader('Content-Type', 'application/pdf');
@@ -35,12 +35,28 @@ export class OperacionesController {
 
   }
 
+  @Post('reporte-inspeccion/excel')
+  async generarReporteExcel(
+    @Body() body: any[],
+    @Res() res: Response
+  ) {
+    const excelBuffer = await this.operaciones.generarReporteInspeccionExcel(body);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename=reporte-inspeccion.xlsx'
+    );
+
+    res.send(excelBuffer);
+  }
+
   @Post('despacho/notificar-inspeccion')
   async notificarReporte(
-    @Body() body: { data: any, emailTo: string | string[] }
+    @Body() body: { data: any, emailTo?: string | string[] }
   ) {
-    console.log('Notificando reporte a:', body.emailTo);
-    const success = await this.operaciones.notificarDespachoEmail(body.data, body.emailTo);
+    //console.log('Notificando reporte a:', body.emailTo);
+    const success = await this.operaciones.notificarDespachoEmail(body.data, body.emailTo || '');
     
     return { 
       success, 
